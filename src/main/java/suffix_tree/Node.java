@@ -7,13 +7,15 @@ public class Node
 {
     private String fragment;
     private ArrayList<Integer> nextNodes;
+    private Integer startPosition;
     private int position;
 
-    public Node(String fragment, int position)
+    public Node(String fragment, int position, Integer suffStartPostion)
     {
         this.fragment = fragment;
         nextNodes = new ArrayList<>();
         this.position = position;
+        this.startPosition = suffStartPostion;
     }
 
     public String getFragment()
@@ -39,4 +41,14 @@ public class Node
     public void addNextNodes(Integer nodeNumber){
         nextNodes.add(nodeNumber);
     }
+
+    public void removeNextNode(Integer nodeNumber){
+        nextNodes.remove(nodeNumber);
+    }
+
+    public Integer getStartPosition()
+    {
+        return startPosition;
+    }
+
 }
