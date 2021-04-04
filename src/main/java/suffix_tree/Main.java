@@ -11,13 +11,21 @@ public class Main {
                 "\n" +
                 "In the United States, education is mainly the responsibility of state and local governments, not the national government. The amount of money spent on education differs from state to state. The subjects studied also differ a little. The school year usually runs from September to June. At the high school level, there are some specialized schools. They include schools that emphasize vocational subjects like business or auto mechanics. Most high schools are general schools. High school students are often involved in the non-academic activities that their school offers -for example, in drama clubs, sports teams, or the school newspaper.";
 
+        /*Использование класса SuffixTree позволяет найти вхождение любого сочетания сиволов
+        * вне зависимости от их положения в тексте
+        * класс SuffixTree1 при меньшем количестве создаваемых узлов позволяет найти вхождение
+        * слов и сочетаний символов находящихся в начале слов*/
+
+        SuffixTree1 suffixTree1 = new SuffixTree1(text);
         SuffixTree suffixTree = new SuffixTree(text);
+
         List<Integer> result = suffixTree.search("school");
+
         if (result != null)
         for (Integer pos : result){
             System.out.println(pos);
         }
 
-        System.out.println(text.indexOf("school"));
+        System.out.println("Сравнение количества узлов" + "\n" + suffixTree.getNodeCounter() + "==========" + suffixTree1.getNodeCounter());
     }
 }

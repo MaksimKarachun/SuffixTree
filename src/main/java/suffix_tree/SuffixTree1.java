@@ -3,16 +3,16 @@ package suffix_tree;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SuffixTree
+public class SuffixTree1
 {
     private String text;
-    private ArrayList<Node> nodes;
-    private Node root;
+    private ArrayList<Node1> nodes;
+    private Node1 root;
     private int nodeCounter = 0;
 
-    public SuffixTree(String text)
+    public SuffixTree1(String text)
     {
-        this.text = text + "$";
+        this.text = text;
         nodes = new ArrayList<>();
         build();
     }
@@ -20,12 +20,20 @@ public class SuffixTree
     private void build()
     {
         //TODO
-        root = new Node(null, 0, 0);
+        root = new Node1(null, 0, 0);
         nodes.add(root);
 
+        int lastIndex = 0;
         for (int i = 0; i < text.length(); i++){
-            String currentSuf = text.substring(i);
-            moveOnTree(root, currentSuf, i);
+            if (text.charAt(i) == ' ' || i == text.length() - 1){
+                if (i == text.length() - 1) {
+                    moveOnTree(root, text.substring(lastIndex, i + 1), lastIndex);
+                }
+                else {
+                    moveOnTree(root, text.substring(lastIndex, i), lastIndex);
+                    lastIndex = i + 1;
+                }
+            }
         }
     }
 
@@ -35,13 +43,13 @@ public class SuffixTree
         return searchInTree(root, query);
     }
 
-    private List<Integer> searchInTree(Node node, String query){
+    private List<Integer> searchInTree(Node1 node, String query){
         Integer nextNodeNum = findNextNode(node, query.charAt(0));
         if (nextNodeNum == null){
             return null;
         }
         else {
-            Node nextNode = nodes.get(nextNodeNum);
+            Node1 nextNode = nodes.get(nextNodeNum);
             int step = checkEdge(nextNode, query);
             if (step == query.length()){
                 //вхождение найдено и значит все суффиксы в ветке начинаются с данного сочетания символов
@@ -54,22 +62,22 @@ public class SuffixTree
         }
     }
 
-    private void moveOnTree(Node node, String suffPart, Integer suffStartPosition){
+    private void moveOnTree(Node1 node, String suffPart, Integer suffStartPosition){
         Integer nextNodeNum = findNextNode(node, suffPart.charAt(0));
         if (nextNodeNum == null){
-            Node newNode = new Node(suffPart, ++nodeCounter, suffStartPosition);
+            Node1 newNode = new Node1(suffPart, ++nodeCounter, suffStartPosition);
             node.addNextNodes(nodeCounter);
             nodes.add(newNode);
         }
         else {
-            Node nextNode = nodes.get(nextNodeNum);
+            Node1 nextNode = nodes.get(nextNodeNum);
             int step = checkEdge(nextNode, suffPart);
             if (step != suffPart.length()) {
                 //если полностью прошли ребро и не прошли суффикс полностью
                 if (step < suffPart.length() && step == nextNode.getFragment().length()) {
                     Integer nextNodeFind = findNextNode(node, suffPart.charAt(step - 1));
                     if (nextNodeFind == null){
-                        Node newNode = new Node(suffPart.substring(step), ++nodeCounter, suffStartPosition);
+                        Node1 newNode = new Node1(suffPart.substring(step), ++nodeCounter, suffStartPosition);
                         node.addNextNodes(nodeCounter);
                         nodes.add(newNode);
                     }
@@ -79,7 +87,7 @@ public class SuffixTree
                 }
                 //если прошли часть ребра и не прошли суффиксполностью (необходимо создание новой ветки)
                 if (step < nextNode.getFragment().length() && step < suffPart.length()) {
-                    Node nodePart = new Node(suffPart.substring(0, step), ++nodeCounter, suffStartPosition);
+                    Node1 nodePart = new Node1(suffPart.substring(0, step), ++nodeCounter, suffStartPosition);
                     nodes.add(nodePart);
                     node.removeNextNode(nextNodeNum);
                     node.addNextNodes(nodePart.getPosition());
@@ -88,10 +96,13 @@ public class SuffixTree
                     moveOnTree(nodePart, suffPart.substring(step), suffStartPosition);
                 }
             }
+            else {
+                nextNode.addStartPosition(suffStartPosition);
+            }
         }
     }
 
-    private Integer checkEdge(Node node, String suff){
+    private Integer checkEdge(Node1 node, String suff){
         char[] edgeChar = node.getFragment().toCharArray();
         char[] suffChar = suff.toCharArray();
         int count = 0;
@@ -105,10 +116,10 @@ public class SuffixTree
         return count;
     }
 
-    private Integer findNextNode(Node node, char firstSuffChar){
+    private Integer findNextNode(Node1 node, char firstSuffChar){
         List<Integer> nextNodeList = node.getNextNodes();
         for (Integer nodeNumber : nextNodeList){
-            Node currentNode = nodes.get(nodeNumber);
+            Node1 currentNode = nodes.get(nodeNumber);
             char[] currentNodeChars = currentNode.getFragment().toCharArray();
             if (firstSuffChar == currentNodeChars[0]){
                 return nodeNumber;
@@ -117,15 +128,15 @@ public class SuffixTree
         return null;
     }
 
-    private List<Integer> checkAllDaughterNodes(Node node){
+    private List<Integer> checkAllDaughterNodes(Node1 node){
         List<Integer> nextNodeList = node.getNextNodes();
         List<Integer> allAntries = new ArrayList<>();
         if (nextNodeList.size() == 0){
-            allAntries.add(node.getStartPosition());
+            allAntries.addAll(node.getStartPosition());
             return allAntries;
         }
         for (Integer nodeNumber : nextNodeList) {
-            Node currentNode = nodes.get(nodeNumber);
+            Node1 currentNode = nodes.get(nodeNumber);
             allAntries.addAll(checkAllDaughterNodes(currentNode));
         }
         return allAntries;
