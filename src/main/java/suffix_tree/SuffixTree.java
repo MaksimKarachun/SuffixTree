@@ -2,17 +2,19 @@ package suffix_tree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SuffixTree
 {
-    private String text;
-    private ArrayList<Node> nodes;
+    private final String text;
+    private final ArrayList<Node> nodes;
     private Node root;
     private int nodeCounter = 0;
 
     public SuffixTree(String text)
     {
-        this.text = text + "$";
+        this.text = text;
         nodes = new ArrayList<>();
         build();
     }
@@ -22,11 +24,7 @@ public class SuffixTree
         //TODO
         root = new Node(null, 0, 0);
         nodes.add(root);
-
-        for (int i = 0; i < text.length(); i++){
-            String currentSuf = text.substring(i);
-            moveOnTree(root, currentSuf, i);
-        }
+        prepreTextAndBuildTree();
     }
 
     public List<Integer> search(String query)
@@ -44,10 +42,9 @@ public class SuffixTree
             Node nextNode = nodes.get(nextNodeNum);
             int step = checkEdge(nextNode, query);
             if (step == query.length()){
-                //вхождение найдено и значит все суффиксы в ветке начинаются с данного сочетания символов
-                return checkAllDaughterNodes(nextNode);
+                return nextNode.getStartPosition();
             }
-            else {//if step < query.length
+            else {
                 return searchInTree(nextNode, query.substring(step));
             }
 
@@ -67,17 +64,9 @@ public class SuffixTree
             if (step != suffPart.length()) {
                 //если полностью прошли ребро и не прошли суффикс полностью
                 if (step < suffPart.length() && step == nextNode.getFragment().length()) {
-                    Integer nextNodeFind = findNextNode(node, suffPart.charAt(step - 1));
-                    if (nextNodeFind == null){
-                        Node newNode = new Node(suffPart.substring(step), ++nodeCounter, suffStartPosition);
-                        node.addNextNodes(nodeCounter);
-                        nodes.add(newNode);
-                    }
-                    else {
-                        moveOnTree(nodes.get(nextNodeFind), suffPart.substring(step), suffStartPosition);
-                    }
+                    moveOnTree(nodes.get(nextNodeNum), suffPart.substring(step), suffStartPosition);
                 }
-                //если прошли часть ребра и не прошли суффиксполностью (необходимо создание новой ветки)
+                //если прошли часть ребра и не прошли суффикс полностью (необходимо создание новой ветки)
                 if (step < nextNode.getFragment().length() && step < suffPart.length()) {
                     Node nodePart = new Node(suffPart.substring(0, step), ++nodeCounter, suffStartPosition);
                     nodes.add(nodePart);
@@ -88,16 +77,19 @@ public class SuffixTree
                     moveOnTree(nodePart, suffPart.substring(step), suffStartPosition);
                 }
             }
+            else {
+                nextNode.addStartPosition(suffStartPosition);
+            }
         }
     }
 
     private Integer checkEdge(Node node, String suff){
         char[] edgeChar = node.getFragment().toCharArray();
-        char[] suffChar = suff.toCharArray();
+        char[] suffixChar = suff.toCharArray();
         int count = 0;
-        int length = Math.min(suffChar.length, edgeChar.length);
+        int length = Math.min(suffixChar.length, edgeChar.length);
         for (int i = 0; i < length; i++) {
-            if (suffChar[i] != edgeChar[i]){
+            if (suffixChar[i] != edgeChar[i]){
                 break;
             }
             count++;
@@ -117,21 +109,30 @@ public class SuffixTree
         return null;
     }
 
-    private List<Integer> checkAllDaughterNodes(Node node){
-        List<Integer> nextNodeList = node.getNextNodes();
-        List<Integer> allAntries = new ArrayList<>();
-        if (nextNodeList.size() == 0){
-            allAntries.add(node.getStartPosition());
-            return allAntries;
-        }
-        for (Integer nodeNumber : nextNodeList) {
-            Node currentNode = nodes.get(nodeNumber);
-            allAntries.addAll(checkAllDaughterNodes(currentNode));
-        }
-        return allAntries;
-    }
+    private void prepreTextAndBuildTree(){
+        StringBuilder word = new StringBuilder();
+        char currentChar;
+        int lastIndex = 0;
+        for (int i = 0; i < text.length(); i++){
+            if (i == text.length() - 1 && word.length() != 0){
+                moveOnTree(root, word.toString(), lastIndex);
+                break;
+            }
 
-    public int getNodeCounter(){
-        return nodeCounter;
+            currentChar = text.charAt(i);
+            if (Character.isLetter(currentChar)) {
+                word.append(currentChar);
+            }
+            else {
+                if (word.length() != 0) {
+                    moveOnTree(root, word.toString(), lastIndex);
+                    lastIndex = i + 1;
+                    word = new StringBuilder();
+                }
+                else {
+                    lastIndex++;
+                }
+            }
+        }
     }
 }

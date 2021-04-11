@@ -6,16 +6,17 @@ import java.util.List;
 public class Node
 {
     private String fragment;
-    private ArrayList<Integer> nextNodes;
-    private Integer startPosition;
-    private int position;
+    private final ArrayList<Integer> nextNodes;
+    private final ArrayList<Integer> startPosition;
+    private final Integer position;
 
     public Node(String fragment, int position, Integer suffStartPostion)
     {
         this.fragment = fragment;
         nextNodes = new ArrayList<>();
         this.position = position;
-        this.startPosition = suffStartPostion;
+        startPosition = new ArrayList<>();
+        startPosition.add(suffStartPostion);
     }
 
     public String getFragment()
@@ -46,7 +47,11 @@ public class Node
         nextNodes.remove(nodeNumber);
     }
 
-    public Integer getStartPosition()
+    public void addStartPosition(Integer position){
+        startPosition.add(position);
+    }
+
+    public ArrayList<Integer> getStartPosition()
     {
         return startPosition;
     }

@@ -12,11 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class SuffixTreeTest {
 
     private SuffixTree suffixTree;
-    private String text;
 
     @BeforeEach
     void setUp() {
-        text = "atabdsf alert sdfasdasd alert sadsadsd";
+        String text = "atabdsf alert sdfasdasd alert sadsadsd";
         suffixTree = new SuffixTree(text);
     }
 
